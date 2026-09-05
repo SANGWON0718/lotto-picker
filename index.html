@@ -4,398 +4,80 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="google-adsense-account" content="ca-pub-5348829394463821">
-  <title>로또 번호 추첨기</title>
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5348829394463821"
-     crossorigin="anonymous"></script>
+  <meta name="description" content="한국 로또 6/45 규칙을 설명하고, 본번호 6개와 보너스 1개를 한 번에 5게임 무작위로 뽑아 주는 무료 번호 추첨기입니다. 당첨을 보장하지 않으며 공식 판매처가 아닙니다." />
+  <title>로또 번호 추첨기 | 로또 6/45 무작위 5게임</title>
+  <link rel="canonical" href="https://sangwon0718.github.io/lotto-picker/">
+  <link rel="stylesheet" href="css/site.css" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5348829394463821" crossorigin="anonymous"></script>
   <script>
     (function () {
-      const saved = localStorage.getItem("lotto-theme");
-      const theme =
-        saved === "light" || saved === "dark"
-          ? saved
-          : window.matchMedia("(prefers-color-scheme: light)").matches
-            ? "light"
-            : "dark";
+      var saved = localStorage.getItem("lotto-theme");
+      var theme = saved === "light" || saved === "dark" ? saved : (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
       document.documentElement.setAttribute("data-theme", theme);
     })();
   </script>
-  <style>
-    :root,
-    html[data-theme="dark"] {
-      --bg: #0f1220;
-      --bg-spot-1: #2a2158;
-      --bg-spot-2: #12324a;
-      --card: #181c30;
-      --card-top: #1e2340;
-      --text: #f4f6ff;
-      --muted: #9aa3c7;
-      --accent: #ffd54a;
-      --ball-shadow: 0 8px 18px rgba(0, 0, 0, 0.28);
-      --game-bg: rgba(255, 255, 255, 0.04);
-      --line: rgba(255, 255, 255, 0.1);
-      --theme-btn-bg: rgba(255, 255, 255, 0.1);
-      --theme-btn-text: #f4f6ff;
-    }
-
-    html[data-theme="light"] {
-      --bg: #eef2fb;
-      --bg-spot-1: #d9e4ff;
-      --bg-spot-2: #ffe9c4;
-      --card: #ffffff;
-      --card-top: #f7f9ff;
-      --text: #1c2238;
-      --muted: #5c6480;
-      --accent: #c98900;
-      --ball-shadow: 0 6px 14px rgba(28, 34, 56, 0.12);
-      --game-bg: rgba(28, 34, 56, 0.04);
-      --line: rgba(28, 34, 56, 0.1);
-      --theme-btn-bg: #eef2fb;
-      --theme-btn-text: #1c2238;
-      color-scheme: light;
-    }
-
-    html[data-theme="dark"] {
-      color-scheme: dark;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    html, body {
-      height: 100%;
-    }
-
-    body {
-      margin: 0;
-      height: 100dvh;
-      overflow: hidden;
-      font-family: "Pretendard", "Noto Sans KR", sans-serif;
-      color: var(--text);
-      background:
-        radial-gradient(circle at top left, var(--bg-spot-1) 0%, transparent 40%),
-        radial-gradient(circle at bottom right, var(--bg-spot-2) 0%, transparent 38%),
-        var(--bg);
-      transition: background 0.25s ease, color 0.25s ease;
-      display: grid;
-      place-items: center;
-      padding: 12px;
-    }
-
-    .card {
-      width: min(780px, 100%);
-      height: 100%;
-      max-height: calc(100dvh - 24px);
-      background: linear-gradient(180deg, var(--card-top) 0%, var(--card) 100%);
-      border: 1px solid var(--line);
-      border-radius: 20px;
-      padding: 16px 20px 14px;
-      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
-    }
-
-    .top {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      flex-shrink: 0;
-    }
-
-    .title {
-      margin: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-    }
-
-    .theme-toggle {
-      position: absolute;
-      right: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      appearance: none;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      padding: 6px 12px;
-      font-size: clamp(0.72rem, 1.4vh, 0.85rem);
-      font-weight: 700;
-      color: var(--theme-btn-text);
-      background: var(--theme-btn-bg);
-      cursor: pointer;
-      box-shadow: none;
-    }
-
-    .theme-toggle:hover,
-    .theme-toggle:active {
-      transform: translateY(-50%);
-    }
-
-    .title h1 {
-      margin: 0;
-      font-size: clamp(1.25rem, 2.4vh, 1.8rem);
-    }
-
-    .dice {
-      width: clamp(28px, 4.5vh, 38px);
-      height: clamp(28px, 4.5vh, 38px);
-      flex-shrink: 0;
-      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
-    }
-
-    .lead {
-      margin: 6px 0 10px;
-      color: var(--muted);
-      line-height: 1.4;
-      font-size: clamp(0.78rem, 1.6vh, 0.95rem);
-      flex-shrink: 0;
-    }
-
-    .results {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      flex: 1;
-      min-height: 0;
-      margin-bottom: 10px;
-    }
-
-    .game {
-      display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-      justify-content: center;
-      align-items: center;
-      gap: 6px 12px;
-      padding: 4px 10px;
-      background: var(--game-bg);
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      flex: 1;
-      min-height: 0;
-    }
-
-    .game-label {
-      color: var(--accent);
-      font-size: clamp(0.75rem, 1.6vh, 0.9rem);
-      font-weight: 800;
-      min-width: 3.2em;
-      text-align: left;
-    }
-
-    .balls {
-      display: flex;
-      flex-wrap: nowrap;
-      justify-content: center;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .stamp {
-      margin: 0;
-      color: var(--muted);
-      font-size: clamp(0.7rem, 1.4vh, 0.82rem);
-      font-weight: 600;
-      letter-spacing: 0.04em;
-    }
-
-    .ball {
-      width: clamp(28px, 5.2vh, 44px);
-      height: clamp(28px, 5.2vh, 44px);
-      border-radius: 50%;
-      display: grid;
-      place-items: center;
-      font-weight: 800;
-      font-size: clamp(0.75rem, 1.8vh, 1.05rem);
-      color: #1a1a1a;
-      box-shadow: var(--ball-shadow);
-      animation: pop 0.35s ease;
-      flex-shrink: 0;
-    }
-
-    .ball.bonus {
-      outline: 2px dashed var(--accent);
-      outline-offset: 2px;
-    }
-
-    .plus {
-      align-self: center;
-      font-size: clamp(0.9rem, 2vh, 1.2rem);
-      color: var(--accent);
-      font-weight: 700;
-    }
-
-    .range-1 { background: #fbc531; }
-    .range-2 { background: #74b9ff; }
-    .range-3 { background: #ff7675; }
-    .range-4 { background: #636e72; color: #fff; }
-    .range-5 { background: #55efc4; }
-
-    #draw {
-      appearance: none;
-      border: 0;
-      border-radius: 999px;
-      padding: 10px 24px;
-      font-size: clamp(0.9rem, 1.8vh, 1.05rem);
-      font-weight: 700;
-      color: #1c1400;
-      background: linear-gradient(180deg, #ffe27a, #ffd54a);
-      cursor: pointer;
-      box-shadow: 0 10px 24px rgba(255, 213, 74, 0.28);
-      flex-shrink: 0;
-      align-self: center;
-    }
-
-    #draw:hover {
-      transform: translateY(-1px);
-    }
-
-    #draw:active {
-      transform: translateY(1px);
-    }
-
-    .hint {
-      margin: 8px 0 0;
-      font-size: clamp(0.72rem, 1.4vh, 0.85rem);
-      color: var(--muted);
-      flex-shrink: 0;
-    }
-
-    @keyframes pop {
-      from {
-        transform: scale(0.6);
-        opacity: 0;
-      }
-      to {
-        transform: scale(1);
-        opacity: 1;
-      }
-    }
-  </style>
 </head>
 <body>
-  <main class="card">
-    <div class="top">
-    <div class="title">
-      <svg class="dice" viewBox="0 0 64 64" aria-hidden="true">
-        <defs>
-          <linearGradient id="diceFace" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#fff8e8" />
-            <stop offset="100%" stop-color="#f0d9a8" />
-          </linearGradient>
-        </defs>
-        <rect x="6" y="6" width="52" height="52" rx="12" fill="url(#diceFace)" stroke="#c9a227" stroke-width="3" />
-        <circle cx="20" cy="20" r="5" fill="#1a1a1a" />
-        <circle cx="44" cy="20" r="5" fill="#1a1a1a" />
-        <circle cx="32" cy="32" r="5" fill="#1a1a1a" />
-        <circle cx="20" cy="44" r="5" fill="#1a1a1a" />
-        <circle cx="44" cy="44" r="5" fill="#1a1a1a" />
-      </svg>
-      <h1>로또 번호 추첨기</h1>
+  <a class="skip" href="#content">본문으로 건너뛰기</a>
+  <header>
+    <div class="wrap header-inner">
+      <a class="brand" href="index.html">로또 번호 추첨기</a>
+      <nav aria-label="주요 메뉴">
+        <a href="index.html" aria-current="page">홈</a>
+        <a href="guide.html">이용 안내</a>
+        <a href="odds.html">확률 설명</a>
+        <a href="about.html">소개</a>
+        <a href="contact.html">문의</a>
+      </nav>
+      <button type="button" class="theme-toggle" id="themeToggle">화이트 모드</button>
     </div>
-      <button type="button" class="theme-toggle" id="themeToggle" aria-label="화면 모드 바꾸기">화이트 모드</button>
-    </div>
-    <p class="lead">버튼을 누르면 1부터 45까지 숫자 중 6개와 보너스 번호 1개를 한 번에 5게임 추천합니다.</p>
-    <div class="results" id="results" aria-live="polite"></div>
-    <button type="button" id="draw">번호 추천하기</button>
-    <p class="hint">버튼을 누를 때마다 5게임이 새로 나옵니다.</p>
+  </header>
+
+  <main id="content" class="wrap">
+    <section class="hero">
+      <h1>로또 6/45 번호 추첨기</h1>
+      <p class="lead">버튼을 누르면 1부터 45까지의 숫자에서 본번호 6개와 보너스 번호 1개를 뽑아 5게임으로 보여 줍니다. 결과는 컴퓨터의 난수이며, 실제 추첨 결과나 당첨을 예측하지 않습니다.</p>
+      <div class="results" id="results" aria-live="polite"></div>
+      <div class="actions">
+        <button type="button" id="draw">번호 추천하기</button>
+      </div>
+      <p class="muted">각 게임 아래에는 번호를 만든 시각이 <code>yyyy.mm.dd 시:분:초</code> 형식으로 표시됩니다.</p>
+    </section>
+
+    <div class="ad-slot" aria-hidden="true"></div>
+
+    <article class="page">
+      <h2>이 사이트가 하는 일</h2>
+      <p>이 사이트는 한국에서 흔히 말하는 로또 6/45 형식, 즉 1~45 가운데 서로 다른 6개 번호와 보너스 1개를 화면에 보여 주는 도구입니다. 방문자가 번호를 고를 때 참고할 수 있도록 만들었으며, 동행복권이나 복권위원회와는 관련이 없습니다.</p>
+      <p>번호는 사람이 손으로 고른 것처럼 보이게 정렬만 하고, 선택 자체는 매번 새로 무작위로 이뤄집니다. 같은 버튼을 여러 번 눌러도 이전 결과가 다음 결과에 영향을 주지 않습니다.</p>
+
+      <h2>사용 전에 알아 두면 좋은 점</h2>
+      <ul>
+        <li>이 도구는 재미와 번호 고르기 보조 용도입니다. 당첨을 약속하지 않습니다.</li>
+        <li>복권을 사려면 공식 판매점이나 공식 온라인 채널을 이용해야 합니다.</li>
+        <li>청소년은 복권을 구매할 수 없습니다. 이 사이트도 구매를 대행하지 않습니다.</li>
+        <li>광고가 표시될 수 있으며, 광고와 번호 결과는 서로 무관합니다.</li>
+      </ul>
+      <p>규칙과 화면 보는 법은 <a href="guide.html">이용 안내</a>에, 조합이 얼마나 많은지는 <a href="odds.html">확률 설명</a>에 따로 정리했습니다. 사이트 운영 목적은 <a href="about.html">소개</a>에서 확인할 수 있습니다.</p>
+
+      <h2>번호 색이 의미하는 것</h2>
+      <p>화면에 나오는 공 색깔은 당첨 여부를 나타내지 않습니다. 1~10, 11~20, 21~30, 31~40, 41~45처럼 구간을 나누어 한눈에 구분하기 쉽게 칠한 것입니다. 보너스 번호만 점선 테두리로 구분합니다.</p>
+    </article>
   </main>
 
-  <script>
-    const resultsEl = document.getElementById("results");
-    const drawBtn = document.getElementById("draw");
-    const themeToggle = document.getElementById("themeToggle");
-    const GAME_COUNT = 5;
-    const THEME_KEY = "lotto-theme";
-
-    function preferredTheme() {
-      const saved = localStorage.getItem(THEME_KEY);
-      if (saved === "light" || saved === "dark") return saved;
-      return window.matchMedia("(prefers-color-scheme: light)").matches
-        ? "light"
-        : "dark";
-    }
-
-    function applyTheme(theme) {
-      document.documentElement.setAttribute("data-theme", theme);
-      localStorage.setItem(THEME_KEY, theme);
-      themeToggle.textContent = theme === "dark" ? "화이트 모드" : "다크 모드";
-    }
-
-    applyTheme(preferredTheme());
-    themeToggle.addEventListener("click", () => {
-      const next =
-        document.documentElement.getAttribute("data-theme") === "dark"
-          ? "light"
-          : "dark";
-      applyTheme(next);
-    });
-
-    function pad(n) {
-      return String(n).padStart(2, "0");
-    }
-
-    function formatStamp(date) {
-      const yyyy = date.getFullYear();
-      const mm = pad(date.getMonth() + 1);
-      const dd = pad(date.getDate());
-      const hh = pad(date.getHours());
-      const mi = pad(date.getMinutes());
-      const ss = pad(date.getSeconds());
-      return `${yyyy}.${mm}.${dd} ${hh}:${mi}:${ss}`;
-    }
-
-    function colorClass(n) {
-      if (n <= 10) return "range-1";
-      if (n <= 20) return "range-2";
-      if (n <= 30) return "range-3";
-      if (n <= 40) return "range-4";
-      return "range-5";
-    }
-
-    function pickNumbers() {
-      const pool = Array.from({ length: 45 }, (_, i) => i + 1);
-      const picked = [];
-      while (picked.length < 7) {
-        const i = Math.floor(Math.random() * pool.length);
-        picked.push(pool.splice(i, 1)[0]);
-      }
-      const bonus = picked.pop();
-      picked.sort((a, b) => a - b);
-      return { numbers: picked, bonus };
-    }
-
-    function ballHtml(n, bonus = false) {
-      const extra = bonus ? " bonus" : "";
-      return `<span class="ball ${colorClass(n)}${extra}">${n}</span>`;
-    }
-
-    function gameHtml(index, stamp) {
-      const { numbers, bonus } = pickNumbers();
-      const balls =
-        numbers.map((n) => ballHtml(n)).join("") +
-        `<span class="plus">+</span>` +
-        ballHtml(bonus, true);
-      return `<article class="game">
-        <span class="game-label">${index}게임</span>
-        <div class="balls">${balls}</div>
-        <p class="stamp">${stamp}</p>
-      </article>`;
-    }
-
-    function render() {
-      const stamp = formatStamp(new Date());
-      resultsEl.innerHTML = Array.from({ length: GAME_COUNT }, (_, i) =>
-        gameHtml(i + 1, stamp)
-      ).join("");
-    }
-
-    drawBtn.addEventListener("click", render);
-    render();
-  </script>
+  <footer>
+    <div class="wrap">
+      <div class="footer-nav">
+        <a href="privacy.html">개인정보처리방침</a>
+        <a href="about.html">소개</a>
+        <a href="contact.html">문의</a>
+        <a href="guide.html">이용 안내</a>
+      </div>
+      <p>이 사이트는 동행복권 공식 서비스가 아닙니다. 제공 번호는 무작위 예시이며 당첨을 보장하지 않습니다.</p>
+      <p>&copy; 2026 로또 번호 추첨기</p>
+    </div>
+  </footer>
+  <script src="js/theme.js"></script>
+  <script src="js/draw.js"></script>
 </body>
 </html>

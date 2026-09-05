@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://sangwon0718.github.io/lotto-picker/sitemap.xml
