@@ -4,14 +4,55 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>로또 번호 추첨기</title>
+  <script>
+    (function () {
+      const saved = localStorage.getItem("lotto-theme");
+      const theme =
+        saved === "light" || saved === "dark"
+          ? saved
+          : window.matchMedia("(prefers-color-scheme: light)").matches
+            ? "light"
+            : "dark";
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
   <style>
-    :root {
+    :root,
+    html[data-theme="dark"] {
       --bg: #0f1220;
+      --bg-spot-1: #2a2158;
+      --bg-spot-2: #12324a;
       --card: #181c30;
+      --card-top: #1e2340;
       --text: #f4f6ff;
       --muted: #9aa3c7;
       --accent: #ffd54a;
       --ball-shadow: 0 8px 18px rgba(0, 0, 0, 0.28);
+      --game-bg: rgba(255, 255, 255, 0.04);
+      --line: rgba(255, 255, 255, 0.1);
+      --theme-btn-bg: rgba(255, 255, 255, 0.1);
+      --theme-btn-text: #f4f6ff;
+    }
+
+    html[data-theme="light"] {
+      --bg: #eef2fb;
+      --bg-spot-1: #d9e4ff;
+      --bg-spot-2: #ffe9c4;
+      --card: #ffffff;
+      --card-top: #f7f9ff;
+      --text: #1c2238;
+      --muted: #5c6480;
+      --accent: #c98900;
+      --ball-shadow: 0 6px 14px rgba(28, 34, 56, 0.12);
+      --game-bg: rgba(28, 34, 56, 0.04);
+      --line: rgba(28, 34, 56, 0.1);
+      --theme-btn-bg: #eef2fb;
+      --theme-btn-text: #1c2238;
+      color-scheme: light;
+    }
+
+    html[data-theme="dark"] {
+      color-scheme: dark;
     }
 
     * {
@@ -29,9 +70,10 @@
       font-family: "Pretendard", "Noto Sans KR", sans-serif;
       color: var(--text);
       background:
-        radial-gradient(circle at top left, #2a2158 0%, transparent 40%),
-        radial-gradient(circle at bottom right, #12324a 0%, transparent 38%),
+        radial-gradient(circle at top left, var(--bg-spot-1) 0%, transparent 40%),
+        radial-gradient(circle at bottom right, var(--bg-spot-2) 0%, transparent 38%),
         var(--bg);
+      transition: background 0.25s ease, color 0.25s ease;
       display: grid;
       place-items: center;
       padding: 12px;
@@ -41,8 +83,8 @@
       width: min(780px, 100%);
       height: 100%;
       max-height: calc(100dvh - 24px);
-      background: linear-gradient(180deg, #1e2340 0%, var(--card) 100%);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: linear-gradient(180deg, var(--card-top) 0%, var(--card) 100%);
+      border: 1px solid var(--line);
       border-radius: 20px;
       padding: 16px 20px 14px;
       box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
@@ -52,13 +94,42 @@
       min-height: 0;
     }
 
+    .top {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      flex-shrink: 0;
+    }
+
     .title {
       margin: 0;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
-      flex-shrink: 0;
+    }
+
+    .theme-toggle {
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      appearance: none;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: clamp(0.72rem, 1.4vh, 0.85rem);
+      font-weight: 700;
+      color: var(--theme-btn-text);
+      background: var(--theme-btn-bg);
+      cursor: pointer;
+      box-shadow: none;
+    }
+
+    .theme-toggle:hover,
+    .theme-toggle:active {
+      transform: translateY(-50%);
     }
 
     .title h1 {
@@ -98,8 +169,8 @@
       align-items: center;
       gap: 6px 12px;
       padding: 4px 10px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: var(--game-bg);
+      border: 1px solid var(--line);
       border-radius: 12px;
       flex: 1;
       min-height: 0;
@@ -161,7 +232,7 @@
     .range-4 { background: #636e72; color: #fff; }
     .range-5 { background: #55efc4; }
 
-    button {
+    #draw {
       appearance: none;
       border: 0;
       border-radius: 999px;
@@ -176,11 +247,11 @@
       align-self: center;
     }
 
-    button:hover {
+    #draw:hover {
       transform: translateY(-1px);
     }
 
-    button:active {
+    #draw:active {
       transform: translateY(1px);
     }
 
@@ -205,6 +276,7 @@
 </head>
 <body>
   <main class="card">
+    <div class="top">
     <div class="title">
       <svg class="dice" viewBox="0 0 64 64" aria-hidden="true">
         <defs>
@@ -222,6 +294,8 @@
       </svg>
       <h1>로또 번호 추첨기</h1>
     </div>
+      <button type="button" class="theme-toggle" id="themeToggle" aria-label="화면 모드 바꾸기">화이트 모드</button>
+    </div>
     <p class="lead">버튼을 누르면 1부터 45까지 숫자 중 6개와 보너스 번호 1개를 한 번에 5게임 추천합니다.</p>
     <div class="results" id="results" aria-live="polite"></div>
     <button type="button" id="draw">번호 추천하기</button>
@@ -231,7 +305,32 @@
   <script>
     const resultsEl = document.getElementById("results");
     const drawBtn = document.getElementById("draw");
+    const themeToggle = document.getElementById("themeToggle");
     const GAME_COUNT = 5;
+    const THEME_KEY = "lotto-theme";
+
+    function preferredTheme() {
+      const saved = localStorage.getItem(THEME_KEY);
+      if (saved === "light" || saved === "dark") return saved;
+      return window.matchMedia("(prefers-color-scheme: light)").matches
+        ? "light"
+        : "dark";
+    }
+
+    function applyTheme(theme) {
+      document.documentElement.setAttribute("data-theme", theme);
+      localStorage.setItem(THEME_KEY, theme);
+      themeToggle.textContent = theme === "dark" ? "화이트 모드" : "다크 모드";
+    }
+
+    applyTheme(preferredTheme());
+    themeToggle.addEventListener("click", () => {
+      const next =
+        document.documentElement.getAttribute("data-theme") === "dark"
+          ? "light"
+          : "dark";
+      applyTheme(next);
+    });
 
     function pad(n) {
       return String(n).padStart(2, "0");
