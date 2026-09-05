@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>로또 번호 추첨기</title>
+  <style>
+    :root {
+      --bg: #0f1220;
+      --card: #181c30;
+      --text: #f4f6ff;
+      --muted: #9aa3c7;
+      --accent: #ffd54a;
+      --ball-shadow: 0 8px 18px rgba(0, 0, 0, 0.28);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      margin: 0;
+      height: 100dvh;
+      overflow: hidden;
+      font-family: "Pretendard", "Noto Sans KR", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, #2a2158 0%, transparent 40%),
+        radial-gradient(circle at bottom right, #12324a 0%, transparent 38%),
+        var(--bg);
+      display: grid;
+      place-items: center;
+      padding: 12px;
+    }
+
+    .card {
+      width: min(780px, 100%);
+      height: 100%;
+      max-height: calc(100dvh - 24px);
+      background: linear-gradient(180deg, #1e2340 0%, var(--card) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 16px 20px 14px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .title {
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .title h1 {
+      margin: 0;
+      font-size: clamp(1.25rem, 2.4vh, 1.8rem);
+    }
+
+    .dice {
+      width: clamp(28px, 4.5vh, 38px);
+      height: clamp(28px, 4.5vh, 38px);
+      flex-shrink: 0;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+    }
+
+    .lead {
+      margin: 6px 0 10px;
+      color: var(--muted);
+      line-height: 1.4;
+      font-size: clamp(0.78rem, 1.6vh, 0.95rem);
+      flex-shrink: 0;
+    }
+
+    .results {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+      min-height: 0;
+      margin-bottom: 10px;
+    }
+
+    .game {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 6px 12px;
+      padding: 4px 10px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .game-label {
+      color: var(--accent);
+      font-size: clamp(0.75rem, 1.6vh, 0.9rem);
+      font-weight: 800;
+      min-width: 3.2em;
+      text-align: left;
+    }
+
+    .balls {
+      display: flex;
+      flex-wrap: nowrap;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .stamp {
+      margin: 0;
+      color: var(--muted);
+      font-size: clamp(0.7rem, 1.4vh, 0.82rem);
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+
+    .ball {
+      width: clamp(28px, 5.2vh, 44px);
+      height: clamp(28px, 5.2vh, 44px);
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      font-size: clamp(0.75rem, 1.8vh, 1.05rem);
+      color: #1a1a1a;
+      box-shadow: var(--ball-shadow);
+      animation: pop 0.35s ease;
+      flex-shrink: 0;
+    }
+
+    .ball.bonus {
+      outline: 2px dashed var(--accent);
+      outline-offset: 2px;
+    }
+
+    .plus {
+      align-self: center;
+      font-size: clamp(0.9rem, 2vh, 1.2rem);
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .range-1 { background: #fbc531; }
+    .range-2 { background: #74b9ff; }
+    .range-3 { background: #ff7675; }
+    .range-4 { background: #636e72; color: #fff; }
+    .range-5 { background: #55efc4; }
+
+    button {
+      appearance: none;
+      border: 0;
+      border-radius: 999px;
+      padding: 10px 24px;
+      font-size: clamp(0.9rem, 1.8vh, 1.05rem);
+      font-weight: 700;
+      color: #1c1400;
+      background: linear-gradient(180deg, #ffe27a, #ffd54a);
+      cursor: pointer;
+      box-shadow: 0 10px 24px rgba(255, 213, 74, 0.28);
+      flex-shrink: 0;
+      align-self: center;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    .hint {
+      margin: 8px 0 0;
+      font-size: clamp(0.72rem, 1.4vh, 0.85rem);
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    @keyframes pop {
+      from {
+        transform: scale(0.6);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="title">
+      <svg class="dice" viewBox="0 0 64 64" aria-hidden="true">
+        <defs>
+          <linearGradient id="diceFace" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#fff8e8" />
+            <stop offset="100%" stop-color="#f0d9a8" />
+          </linearGradient>
+        </defs>
+        <rect x="6" y="6" width="52" height="52" rx="12" fill="url(#diceFace)" stroke="#c9a227" stroke-width="3" />
+        <circle cx="20" cy="20" r="5" fill="#1a1a1a" />
+        <circle cx="44" cy="20" r="5" fill="#1a1a1a" />
+        <circle cx="32" cy="32" r="5" fill="#1a1a1a" />
+        <circle cx="20" cy="44" r="5" fill="#1a1a1a" />
+        <circle cx="44" cy="44" r="5" fill="#1a1a1a" />
+      </svg>
+      <h1>로또 번호 추첨기</h1>
+    </div>
+    <p class="lead">버튼을 누르면 1부터 45까지 숫자 중 6개와 보너스 번호 1개를 한 번에 5게임 추천합니다.</p>
+    <div class="results" id="results" aria-live="polite"></div>
+    <button type="button" id="draw">번호 추천하기</button>
+    <p class="hint">버튼을 누를 때마다 5게임이 새로 나옵니다.</p>
+  </main>
+
+  <script>
+    const resultsEl = document.getElementById("results");
+    const drawBtn = document.getElementById("draw");
+    const GAME_COUNT = 5;
+
+    function pad(n) {
+      return String(n).padStart(2, "0");
+    }
+
+    function formatStamp(date) {
+      const yyyy = date.getFullYear();
+      const mm = pad(date.getMonth() + 1);
+      const dd = pad(date.getDate());
+      const hh = pad(date.getHours());
+      const mi = pad(date.getMinutes());
+      const ss = pad(date.getSeconds());
+      return `${yyyy}.${mm}.${dd} ${hh}:${mi}:${ss}`;
+    }
+
+    function colorClass(n) {
+      if (n <= 10) return "range-1";
+      if (n <= 20) return "range-2";
+      if (n <= 30) return "range-3";
+      if (n <= 40) return "range-4";
+      return "range-5";
+    }
+
+    function pickNumbers() {
+      const pool = Array.from({ length: 45 }, (_, i) => i + 1);
+      const picked = [];
+      while (picked.length < 7) {
+        const i = Math.floor(Math.random() * pool.length);
+        picked.push(pool.splice(i, 1)[0]);
+      }
+      const bonus = picked.pop();
+      picked.sort((a, b) => a - b);
+      return { numbers: picked, bonus };
+    }
+
+    function ballHtml(n, bonus = false) {
+      const extra = bonus ? " bonus" : "";
+      return `<span class="ball ${colorClass(n)}${extra}">${n}</span>`;
+    }
+
+    function gameHtml(index, stamp) {
+      const { numbers, bonus } = pickNumbers();
+      const balls =
+        numbers.map((n) => ballHtml(n)).join("") +
+        `<span class="plus">+</span>` +
+        ballHtml(bonus, true);
+      return `<article class="game">
+        <span class="game-label">${index}게임</span>
+        <div class="balls">${balls}</div>
+        <p class="stamp">${stamp}</p>
+      </article>`;
+    }
+
+    function render() {
+      const stamp = formatStamp(new Date());
+      resultsEl.innerHTML = Array.from({ length: GAME_COUNT }, (_, i) =>
+        gameHtml(i + 1, stamp)
+      ).join("");
+    }
+
+    drawBtn.addEventListener("click", render);
+    render();
+  </script>
+</body>
+</html>
